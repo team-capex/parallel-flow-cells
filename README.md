@@ -28,6 +28,8 @@ source .venv/bin/activate
 
 Note: Replace *bin* with *Scripts* if using windows.
 
+## Calibrating Load Cells
+
 ## Other Requirements
 
 - Platformio vscode extension to flash firmware to PCBs

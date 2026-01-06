@@ -195,6 +195,8 @@ void setup() {
   else {
     LEDS.spinnerTimer(1, RED);
   }
+
+  respond("# Controller available");
 }
 
 // ---------------- Loop ----------------
