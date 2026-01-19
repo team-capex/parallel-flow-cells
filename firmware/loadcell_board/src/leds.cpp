@@ -13,7 +13,7 @@ static const RGB COLOR_MAP[] = {
   /* TRANSMIT    */ {184, 141, 255}, // soft purple (tx / network activity)
   /* ERROR       */ {255, 125, 137}, // soft red-pink
   /* HAPPY       */ {103, 181, 121}, // soft green
-  /* WARNING     */ {198, 155,  93}, // amber / warning
+  /* WARNING     */ {67,  235, 52}, // amber / warning
   /* SLEEP       */ {117, 163, 255}, // calm blue (use low brightness in patterns)
   /* CO2         */ {230, 116, 108}, // light red
   /* CALIBRATING */ {131, 164, 209}, // desaturated blue-grey

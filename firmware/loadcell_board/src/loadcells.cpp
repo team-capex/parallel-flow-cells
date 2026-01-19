@@ -58,6 +58,23 @@ void loadcellsTareAll() {
   Serial.println("Tared all channels");
 }
 
+void loadcellTare(int cell) {
+  if (cell < 1 || cell > NUM_CHANNELS) {
+    Serial.println("Invalid cell number!");
+    return;
+  } 
+
+  delay(1000);
+  
+  scales[cell-1].tare(20); // averages 10 reads
+  LC_OFFSET[cell-1] = scales[cell-1].get_offset();
+
+  // Keep current scales, but persist new offsets
+  storageSaveCalib(LC_SCALE, LC_OFFSET, NUM_CHANNELS);
+
+  Serial.println("Tared channel " + String(cell));
+}
+
 bool loadcellsReadAll(float outMass[NUM_CHANNELS]) {
   bool ok = true;
   for (uint8_t i = 0; i < NUM_CHANNELS; ++i) {
@@ -69,6 +86,55 @@ bool loadcellsReadAll(float outMass[NUM_CHANNELS]) {
       outMass[i] = NAN;
     }
   }
+  return ok;
+}
+
+bool loadcellRead(int cell, float &outMass) {
+  bool ok = false;
+
+  if (cell < 1 || cell > NUM_CHANNELS) {
+    Serial.println("Invalid cell number!");
+    return ok;
+  } 
+
+  if (scales[cell-1].is_ready()) {
+    // Average a few samples for stability but keep it fast
+    outMass = scales[cell-1].get_units(5); // result already in units via set_scale()
+    ok = true;
+  } else {
+    outMass = NAN;
+  }
+  
+  return ok;
+}
+
+bool loadcellCalibrate(int cell, float knownMassKg) {
+  bool ok = false;
+
+  if (cell < 1 || cell > NUM_CHANNELS) {
+    Serial.println("Invalid cell number!");
+    return ok;
+  } 
+
+  delay(1000);
+
+  if (scales[cell-1].is_ready()) {
+    ok = true;
+  } else {
+    return ok;
+  }
+
+  long counts = scales[cell-1].get_value(20);
+  if (counts == 0) counts = 1;              // avoid div0
+  float scale = (float)counts / knownMassKg; // counts per kg (units = kg)
+
+  LC_SCALE[cell-1]  = scale;
+  scales[cell-1].set_scale(scale);
+
+  // Persist to NVS
+  storageSaveCalib(LC_SCALE, LC_OFFSET, NUM_CHANNELS);
+
+  Serial.println("Calibrated channel " + String(cell) + " with " + String(knownMassKg, 3) + "kg");
   return ok;
 }
 

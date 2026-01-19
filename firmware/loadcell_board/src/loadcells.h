@@ -18,5 +18,8 @@ extern long  LC_OFFSET[NUM_CHANNELS];  // stored offset after tare
 
 void loadcellsInit();
 void loadcellsTareAll();                          // tare every channel
+void loadcellTare(int cell);
 bool loadcellsReadAll(float outMass[NUM_CHANNELS]); // returns true if all fresh
+bool loadcellRead(int cell, float &outMass);
 bool loadcellsCalibrateAll(float knownMassKg, uint8_t btn_pin, LedAnimations &leds, uint16_t settleMsPerStep = 2000);
+bool loadcellCalibrate(int cell, float knownMassKg);
