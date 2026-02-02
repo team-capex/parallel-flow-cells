@@ -13,16 +13,16 @@ def skip_if_sim(default_return = None):
         return wrapper
     return decorator
 
-class LoadCells:
-    def __init__(self, COM: str, baud: int = 115200, sim: bool = False, timeout: float = 60.0):
+class pump_controller:
+    def __init__(self, COM: str, baud: int = 115200, sim: bool = False, timeout: float = 120.0):
         self.sim = sim
         self.timeout = timeout
 
         if self.sim:
-            logging.info("Simulated connection to load cell board established.")
+            logging.info("Simulated connection to controller board established.")
 
         else:
-            logging.info("Configuring load cell board serial port..")
+            logging.info("Configuring controller board serial port..")
             self.ser = serial.Serial(
                 port=COM,
                 xonxoff=False,
@@ -40,7 +40,7 @@ class LoadCells:
             self.ser.setDTR(False)  # False = inactive = HIGH (because DTR is active-low)
             self.ser.setRTS(False)
 
-            logging.info("Attempting to open load cell board serial port..")
+            logging.info("Attempting to open controller board serial port..")
 
             if self.ser.isOpen() is False:
                 self.ser.open()
@@ -54,7 +54,7 @@ class LoadCells:
 
             # Check connection (blocking)
             if self.check_status():
-                logging.info("Serial connection to load cell board established.")
+                logging.info("Serial connection to controller board established.")
 
     @skip_if_sim(default_return="0")
     def get_data(self) -> str:
@@ -85,7 +85,7 @@ class LoadCells:
 
     @skip_if_sim()
     def close_ser(self) -> None:
-        logging.info("Closing serial connection to load cell board.")
+        logging.info("Closing serial connection to controller board.")
         if self.ser.isOpen():
             self.ser.close()
 
@@ -94,32 +94,31 @@ class LoadCells:
         self.ser.write("statusCheck()".encode())
         self.check_response()
 
-    @skip_if_sim(default_return = 0)
-    def get_cell_weight(self, cell_no: int) -> None:
-        self.ser.write(f"readCell({cell_no})".encode())
+    @skip_if_sim(default_return = 25)
+    def get_temperature(self) -> float:
+        self.ser.write("getTemperature()".encode())
         return float(self.get_data())
-    
+        
+    @skip_if_sim(default_return = 50)
+    def get_humidity(self) -> float:
+        self.ser.write("getHumidity()".encode())
+        return float(self.get_data())
+        
     @skip_if_sim()
-    def tare_cell(self, cell_no: int) -> None:
-        self.ser.write(f"tareCell({cell_no})".encode())
+    def single_pump(self, pump_no: int, ml: float, flow_rate: float = 0.05) -> None:
+        self.ser.write(f"singleStepperPump({pump_no},{ml:.3f},{flow_rate:.3f})".encode())
         self.check_response()
 
     @skip_if_sim()
-    def calibrate_cell(self, cell_no: int) -> None:
-        self.ser.write(f"calibrateCell({cell_no})".encode())
+    def multi_pump(self, ml: list[float], flow_rate: float = 0.05) -> None:
+        if len(ml) != 4:
+            raise ValueError("Exactly 4 volumes are required")
+        
+        args = ",".join(f"{float(v):.3f}" for v in ml)
+        self.ser.write(f"multiStepperPump({args},{flow_rate:.3f})".encode())
         self.check_response()
 
     @skip_if_sim()
-    def change_calibration_weight(self, weight_kg: float) -> None:
-        self.ser.write(f"changeCalWeight({weight_kg})".encode())
+    def pwm_pump(self, pump_no: int, pwm: float) -> None:
+        self.ser.write(f"setPWM({pump_no},{pwm})".encode())
         self.check_response()
-        
-    @skip_if_sim()
-    def tare_all(self) -> None:
-        self.ser.write("tareAll()".encode())
-        self.check_response()
-
-       
-        
-        
-    

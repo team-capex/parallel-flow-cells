@@ -115,7 +115,6 @@ const unsigned long screenReset = 120;
 bool mfc_connected = false;
 
 // ------ Prototypes ------
-void pwmDrivingSignal(int motor, int power);
 void valveSignal(int valve, bool state);
 long volToSteps(float vol);
 void runSteppers();
@@ -157,10 +156,10 @@ void setup() {
   MFC.begin(Wire);
   if (MFC.mfcOn()) {
     mfc_connected = true;
-    Serial.println("MFC enabled")
+    Serial.println("MFC enabled");
   }
   else {
-    Serial.println("MFC not found")
+    Serial.println("MFC not found");
   }
 
   // LEDs
@@ -170,7 +169,6 @@ void setup() {
   pinMode(BUTTON, INPUT);
 
   Serial.println("Available functions:");
-  Serial.println("setPWM(int motor, int power [%]");
   Serial.println("singleStepperPump(int motor, float volume [ml], float flow_rate [ml/min])");
   Serial.println("multiStepperPump(float v1 [ml], float v2 [ml], float v3 [ml], float v4 [ml], float flow_rate [ml/s])");
   Serial.println("valveTimer(int valve, float seconds)");
@@ -180,6 +178,7 @@ void setup() {
   Serial.println("getHumidity()");
   Serial.println("statusCheck()");
   Serial.println("mfcOn()");
+  Serial.println("beginCO2()");
   Serial.println("mfcOff()");
   Serial.println("mfcSetFlow(float sccm)");
   Serial.println("mfcGetFlow()");
@@ -189,12 +188,8 @@ void setup() {
   // BLE
   ble_begin(DEVICE_NAME, SERVICE_UUID, CHARACTERISTIC_UUID);
 
-  if (ok) {
-    LEDS.spinnerTimer(1, GREEN);
-  }
-  else {
-    LEDS.spinnerTimer(1, RED);
-  }
+
+  LEDS.spinnerTimer(1, GREEN);
 
   respond("# Controller available");
 }
@@ -220,18 +215,6 @@ void loop() {
 
       driveStepper(motor, vol, flow_rate/60.0f);
       respond("# Pump action complete");
-    }
-    else if (action == "setPWM") {
-      motor     = readArg(',').toInt();
-      pwm       = readArg(')').toFloat();
-
-      if (mfc_connected) {
-        respond("[ERROR] PWM not available");
-      }
-      else {
-        pwmDrivingSignal(motor, pwm);
-        respond("# Pump action complete");
-      }
     }
     else if (action == "multiStepperPump") {
       volumes[0] = readArg(',').toFloat();
@@ -287,6 +270,11 @@ void loop() {
       (void)readArg(')');
       bool ok = MFC.mfcOff();
       respond(ok ? "# MFC off" : "MFC off failed");
+    }
+    else if (action == "beginCO2") {
+      (void)readArg(')');
+      bool ok = MFC.robustStartCO2(false);
+      respond(ok ? "# CO2 measurement started" : "CO2 measurement failed to start");
     }
     else if (action == "mfcSetFlow") {
       float sccm = readArg(')').toFloat();   // e.g. 250.0 = 0.25 slm

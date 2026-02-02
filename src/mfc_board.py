@@ -13,7 +13,7 @@ def skip_if_sim(default_return = None):
         return wrapper
     return decorator
 
-class Controller:
+class mfc_with_steppers:
     def __init__(self, COM: str, baud: int = 115200, sim: bool = False, timeout: float = 120.0):
         self.sim = sim
         self.timeout = timeout
@@ -119,11 +119,6 @@ class Controller:
         self.check_response()
 
     @skip_if_sim()
-    def transfer_pump(self, pump_no: int, pwm: float) -> None:
-        self.ser.write(f"setPWM({pump_no},{pwm})".encode())
-        self.check_response()
-
-    @skip_if_sim()
     def open_valve(self, valve_no: int) -> None:
         self.ser.write(f"valveOpen({valve_no})".encode())
         self.check_response()
@@ -136,6 +131,11 @@ class Controller:
     @skip_if_sim()
     def mfc_on(self) -> None:
         self.ser.write("mfcOn()".encode())
+        self.check_response()
+
+    @skip_if_sim()
+    def begin_co2(self) -> None:
+        self.ser.write("beginCO2()".encode())
         self.check_response()
 
     @skip_if_sim()

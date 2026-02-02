@@ -1,0 +1,67 @@
+serial:
+  load_cell_board:
+    port: COM7
+    baud: 115200
+  mfc_stepper_valve_board:
+    port: COM8
+    baud: 115200
+  pump_board:
+    port: COM9
+    baud: 115200
+    
+system:
+  cells:
+  - 1
+  - 2
+  - 3
+  - 4
+  valves:
+    '1': 1
+    '2': 2
+    '3': 3
+    '4': 4
+
+topup:
+  density_g_per_ml: 1.0
+  target_volume_ml: 150.0
+  min_volume_ml: 120.0
+  pump_pwm: 0.65
+  pump_rate_ml_per_s: 0.9
+  max_pump_s_per_cell: 30.0
+  recheck_after_pump_s: 2.0
+  max_attempts: 3
+
+defaults:
+  electrolyte_stepper_flow_rate_ml_per_s: 0.08
+
+experiment:
+  name: example_parallel_4cell_run
+  steps:
+
+  - name: prime_flows
+    type: flow
+    duration_s: 300
+    co2_flow_sccm: 50.0
+    electrolyte_flow_rate_ml_per_s: 0.08
+    divert_cell: null
+
+  - name: topup_before_measurement
+    type: topup
+
+  - name: measurement_placeholder
+    type: measure
+    duration_s: 600
+    note: Placeholder for Biologic VSP-300 control (one channel per cell).
+
+  - name: divert_cell_2_to_analyzer
+    type: divert
+    cell: 2
+    duration_s: 120
+
+  - name: stop_co2
+    type: co2_off
+
+  - name: deprime_reverse_liquid
+    type: deprime
+    duration_s: 180
+    electrolyte_flow_rate_ml_per_s: 0.06
