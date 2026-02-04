@@ -53,8 +53,8 @@ class LoadCells:
             time.sleep(2)
 
             # Check connection (blocking)
-            if self.check_status():
-                logging.info("Serial connection to load cell board established.")
+            self.check_response()
+            logging.info("Serial connection to load cell board established.")
 
     @skip_if_sim(default_return="0")
     def get_data(self) -> str:

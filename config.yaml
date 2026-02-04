@@ -1,12 +1,12 @@
 serial:
   load_cell_board:
-    port: COM7
+    port: /dev/cu.wchusbserial1220
     baud: 115200
   mfc_stepper_valve_board:
-    port: COM8
+    port: /dev/cu.wchusbserial1230
     baud: 115200
   pump_board:
-    port: COM9
+    port: /dev/cu.wchusbserial110
     baud: 115200
     
 system:

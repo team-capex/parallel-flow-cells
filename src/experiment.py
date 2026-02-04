@@ -237,7 +237,6 @@ class ExperimentRunner:
         log.info("CO2: ON, set flow=%.2f sccm", co2_flow_sccm)
         self.mfc.mfc_on()
         self.mfc.mfc_set_flow(co2_flow_sccm)
-        self.mfc.begin_co2()
 
         self._set_divert(divert_cell)
 

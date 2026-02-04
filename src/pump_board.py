@@ -53,8 +53,8 @@ class pump_controller:
             time.sleep(2)
 
             # Check connection (blocking)
-            if self.check_status():
-                logging.info("Serial connection to controller board established.")
+            self.check_response()
+            logging.info("Serial connection to controller board established.")
 
     @skip_if_sim(default_return="0")
     def get_data(self) -> str:

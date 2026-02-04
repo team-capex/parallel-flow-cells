@@ -53,8 +53,8 @@ class mfc_with_steppers:
             time.sleep(2)
 
             # Check connection (blocking)
-            if self.check_status():
-                logging.info("Serial connection to controller board established.")
+            self.check_response()
+            logging.info("Serial connection to controller board established.")
 
     @skip_if_sim(default_return="0")
     def get_data(self) -> str:
@@ -131,11 +131,6 @@ class mfc_with_steppers:
     @skip_if_sim()
     def mfc_on(self) -> None:
         self.ser.write("mfcOn()".encode())
-        self.check_response()
-
-    @skip_if_sim()
-    def begin_co2(self) -> None:
-        self.ser.write("beginCO2()".encode())
         self.check_response()
 
     @skip_if_sim()
