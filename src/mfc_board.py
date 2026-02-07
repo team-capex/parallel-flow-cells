@@ -73,15 +73,18 @@ class mfc_with_steppers:
         
     @skip_if_sim()
     def check_response(self) -> None:
-        data = self.get_data()
+        while True:
+            data = self.get_data()
 
-        while(1):
+            if data.startswith("ESP-ROM:"):
+                continue
+
             if '#' in data:
                 return
-            elif "Unknown command" in data:
+            if "Unknown command" in data:
                 raise RuntimeError("Controller board failed to recognise command: " + data)
-            else:
-                logging.info(data)
+
+            logging.info(data)
 
     @skip_if_sim()
     def close_ser(self) -> None:
